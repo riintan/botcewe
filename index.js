@@ -25,7 +25,9 @@ const {
     meme, 
     translate, 
     getLocationData,
-    images
+    images,
+    resep,
+    rugapoi
 } = require('./lib')
 
 const { 
@@ -67,7 +69,7 @@ const start = (aruga = new Client()) => {
 	const groups = await aruga.getAllGroups()
 	// kodisi ketika batas group bot telah tercapat, ubah di file settings/setting.json
 	if (groups.length > groupLimit) {
-	await aruga.sendText(chat.id, `Sorry, the group on this bot is full\nMax Group is: ${groupLimit}`).then(() => {
+	await aruga.sendText(chat.id, `Sorry, sedang dalam pembersihan grup\nMax Group is: ${groupLimit}`).then(() => {
 	      aruga.leaveGroup(chat.id)
 	      aruga.deleteChat(chat.id)
 	  }) 
@@ -79,26 +81,29 @@ const start = (aruga = new Client()) => {
 	      aruga.deleteChat(chat.id)
 	    })
 	    } else {
-        await aruga.simulateTyping(chat.id, true).then(() => {
-          aruga.sendText(chat.id, `Hai minna~, Im Aruga BOT. To find out the commands on this bot type ${prefix}menu`)
+        await aruga.simulateTyping(chat.id, true).then(async () => {
+          await aruga.sendText(chat.id, `Hai semua~, Im Riintan BOT. untuk penggunaan bot silahkan ketik ${prefix}menu`)
         })
 	    }
 	}
     })
 
     // ketika seseorang masuk/keluar dari group
-    aruga.onGlobalParicipantsChanged((event) => {
+    aruga.onGlobalParicipantsChanged(async (event) => {
         // kondisi ketika seseorang diinvite/join group lewat link
-        if (event.action === 'add' || event.action === 'invite') aruga.sendTextWithMentions(event.chat, `Hello, Welcome to the group @${event.who.replace('@c.us', '')} \n\nHave fun with us✨`)
+        if (event.action === 'add' || event.action === 'invite') await aruga.sendTextWithMentions(event.chat, `hai, Welcome to the group @${event.who.replace('@c.us', '')} \n\nyang baru masuk tolong intro yah :D
 
         // kondisi ketika seseorang dikick/keluar dari group
-	    if (event.action === 'remove' || event.action === 'leave') aruga.sendTextWithMentions(event.chat, `Good bye @${event.who.replace('@c.us', '')}, We'll miss you`)
+	    if (event.action === 'remove' || event.action === 'leave') await aruga.sendTextWithMentions(event.chat, `Good bye @${event.who.replace('@c.us', '')}, semoga tenang disana ;)`)
     })
 
     aruga.onIncomingCall(async (callData) => {
-        // ketika seseorang menelpon nomor bot
-        aruga.sendText(callData.peerJid, 'Maaf sedang tidak bisa menerima panggilan, block dlu gan.')
-        aruga.contactBlock(callData.peerJid)
+        // ketika seseorang menelpon nomor bot akan mengirim pesan
+        await aruga.sendText(callData.peerJid, 'Maaf sedang tidak bisa menerima panggilan.\n\n-bot')
+        .then(async () => {
+            // bot akan memblock nomor itu
+            await aruga.contactBlock(callData.peerJid)
+        })
     })
 
     // ketika seseorang mengirim pesan
@@ -180,20 +185,20 @@ const start = (aruga = new Client()) => {
             .then(() => aruga.sedText(from, 'Jika kalian ingin request fitur silahkan chat nomor owner!'))
             break
         case 'join':
-            if (args.length == 0) return aruga.reply(from, `Jika kalian ingin mengundang bot kegroup silahkan invite atau dengan\nketik ${prefix}join [link group]`, id)
+            if (args.length == 0) return aruga.reply(from, `gw masuk,tapi udh izin ma owner gw kan? ${prefix}join [link group]`, id)
             let linkgrup = body.slice(6)
             let islink = linkgrup.match(/(https:\/\/chat.whatsapp.com)/gi)
-            let chekgrup = await client.inviteInfo(islink)
+            let chekgrup = await aruga.inviteInfo(islink)
             if (!islink) return aruga.reply(from, 'Maaf link group-nya salah! sialahkan kirim link yang benar', id)
             if (isOwnerBot) {
                 await aruga.joinGroupViaLink(linkgrup)
                       .then(async () => {
                           await aruga.sendText(from, 'Berhasil join grup via link!')
-                          await aruga.sendText(chekgrup.id, `Hai minna~, Im Aruga BOT. To find out the commands on this bot type ${prefix}menu`)
+                          await aruga.sendText(chekgrup.id, `Hai semua~, Im Riintan BOT. To find out the commands on this bot type ${prefix}menu`)
                       })
             } else {
                 let cgrup = await aruga.getAllGroups()
-                if (cgrup.length > groupLimit) return aruga.reply(from, `Sorry, the group on this bot is full\nMax Group is: ${groupLimit}`, id)
+                if (cgrup.length > groupLimit) return aruga.reply(from, `Sorry, sedang dalam pembersihan\nMax Group is: ${groupLimit}`, id)
                 if (cgrup.size < memberLimit) return aruga.reply(from, `Sorry, Sorry, BOT wil not join if the group members do not exceed ${memberLimit} people`, id)
                 await aruga.joinGroupViaLink(linkgrup)
                       .then(async () =>{
@@ -529,10 +534,38 @@ const start = (aruga = new Client()) => {
         
         // Search Any
         case 'images':
+            if (args.length == 0) return aruga.reply(from, `Untuk mencari gambar di pinterest\nketik: ${prefix}images [search]\ncontoh: ${prefix}images naruto`, id)
             const cariwall = body.slice(8)
             const hasilwall = await images.fdci(cariwall)
             aruga.sendFileFromUrl(from, hasilwall, '', '', id)
             break
+        case 'sreddit':
+            if (args.length == 0) return aruga.reply(from, `Untuk mencari gambar di sub reddit\nketik: ${prefix}sreddit [search]\ncontoh: ${prefix}sreddit naruto`, id)
+            const carireddit = body.slice(9)
+            const hasilreddit = await images.sreddit(carireddit)
+            aruga.sendFileFromUrl(from, hasilreddit, '', '', id)
+            
+        case 'resep':
+            if (args.length == 0) return aruga.reply(from, `Untuk mencari resep makanan\nCaranya ketik: ${prefix}resep [search]\n\ncontoh: ${prefix}resep tahu`, id)
+            const cariresep = body.slice(7)
+            const hasilresep = await resep.resep(cariresep)
+            aruga.reply(from, hasilresep + '\n\nIni kak resep makanannya..', id)
+            break
+        case 'nekopoi':
+            aruga.sendText(from, `Sedang mencari video terbaru dari website nekopoi...`)
+            rugapoi.getLatest()
+            .then((result) => {
+                rugapoi.getVideo(result.link)
+                .then((res) => {
+                    let heheq = '\n'
+                    for (let i = 0; i < res.links.length; i++) {
+                        heheq += `${res.links[i]}\n`
+                    }
+                    aruga.reply(from, `Title: ${res.title}\n\nLink:\n${heheq}\nmasih tester bntr :v`)
+                })
+            })
+            break
+            
         // Other Command
         case 'resi':
             if (args.length !== 2) return aruga.reply(from, `Maaf, format pesan salah.\nSilahkan ketik pesan dengan ${prefix}resi <kurir> <no_resi>\n\nKurir yang tersedia:\njne, pos, tiki, wahana, jnt, rpx, sap, sicepat, pcp, jet, dse, first, ninja, lion, idl, rex`, id)
@@ -581,7 +614,8 @@ const start = (aruga = new Client()) => {
             if (!isUrl(args[0])) return aruga.reply(from, 'Maaf, url yang kamu kirim tidak valid.', message.id)
             const shortlink = await urlShortener(args[0]);
             await aruga.sendText(from, shortlink);
-             break
+            break
+
         // Group Commands (group admin only)
 	    case 'add':
             if (!isGroupMsg) return aruga.reply(from, 'Maaf, perintah ini hanya dapat dipakai didalam grup!', id)
@@ -630,7 +664,7 @@ const start = (aruga = new Client()) => {
         case 'bye':
             if (!isGroupMsg) return aruga.reply(from, 'Maaf, perintah ini hanya dapat dipakai didalam grup!', id)
             if (!isGroupAdmins) return aruga.reply(from, 'Gagal, perintah ini hanya dapat digunakan oleh admin grup!', id)
-            aruga.sendText(from, 'Good bye... ( ⇀‸↼‶ )').then(() => aruga.leaveGroup(groupId))
+            aruga.sendText(from, 'Good bye semua... ( ⇀‸↼‶ )').then(() => aruga.leaveGroup(groupId))
             break
         case 'del':
             if (!isGroupAdmins) return aruga.reply(from, 'Gagal, perintah ini hanya dapat digunakan oleh admin grup!', id)
@@ -648,7 +682,7 @@ const start = (aruga = new Client()) => {
                 hehex += '╠➥'
                 hehex += ` @${groupMem[i].id.replace(/@c.us/g, '')}\n`
             }
-            hehex += '╚═〘 *A R U G A  B O T* 〙'
+            hehex += '╚═〘 *RIINTAN  B O T* 〙'
             await aruga.sendTextWithMentions(from, hehex)
             break
         case 'botstat': {
@@ -658,6 +692,7 @@ const start = (aruga = new Client()) => {
             aruga.sendText(from, `Status :\n- *${loadedMsg}* Loaded Messages\n- *${groups.length}* Group Chats\n- *${chatIds.length - groups.length}* Personal Chats\n- *${chatIds.length}* Total Chats`)
             break
         }
+
         //Owner Group
         case 'kickall': //mengeluarkan semua member
         if (!isGroupMsg) return aruga.reply(from, 'Maaf, perintah ini hanya dapat dipakai didalam grup!', id)
@@ -690,11 +725,11 @@ const start = (aruga = new Client()) => {
                 fs.writeFileSync('./settings/banned.json', JSON.stringify(banned))
                 aruga.reply(from, 'Succes unbanned target!')
             } else {
-                for (let i = 0; i < mentionedJidList.length; i++) {
-                    banned.push(mentionedJidList[i])
-                    fs.writeFileSync('./settings/banned.json', JSON.stringify(banned))
-                       aruga.reply(from, 'Succes ban target!', id)
-                   }
+             for (let i = 0; i < mentionedJidList.length; i++) {
+                banned.push(mentionedJidList[i])
+                fs.writeFileSync('./settings/banned.json', JSON.stringify(banned))
+                    aruga.reply(from, 'Succes ban target!', id)
+                }
             }
             break
         case 'bc': //untuk broadcast atau promosi
@@ -704,8 +739,8 @@ const start = (aruga = new Client()) => {
             const chatz = await aruga.getAllChatIds()
             for (let idk of chatz) {
                 var cvk = await aruga.getChatById(idk)
-                if (!cvk.isReadOnly) aruga.sendText(idk, `〘 *A R U G A  B C* \n\n${msg}`)
-                if (cvk.isReadOnly) aruga.sendText(idk, `〘 *A R U G A  B C* \n\n${msg}`)
+                if (!cvk.isReadOnly) aruga.sendText(idk, `〘 *RIINTAN  B C* 〙\n\n${msg}`)
+                if (cvk.isReadOnly) aruga.sendText(idk, `〘 *RIINTAN  B C* 〙\n\n${msg}`)
             }
             aruga.reply(from, 'Broadcast Success!', id)
             break

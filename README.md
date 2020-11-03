@@ -8,6 +8,9 @@
  [Trakteer](https://trakteer.id/arugabot)
  
 </details>
+
+bantu kontribusi dengan cara pull request atau request di issues, makasi
+[`Whastapp saya`](https://wa.me/6281908330577?text=ini%20aruga?)
 </div>
 
 ## Getting Started
@@ -29,24 +32,6 @@ Install the dependencies:
 > npm install
 ```
 
-jangan lupa install ffmpeg sama wget 
-
-kalo kelen pake rdp windows , jan lupa download binary penunjang
-dibawah ini
-
-<a href="https://drive.google.com/file/d/1SugE8vjfOyyW3VTRqsxlW_GJh6EKQ19X/view?usp=drivesdk"> Download </a>
-
-pindahin folder ffmpeg ke `C:\`
-dan file wget.exe ke `system32`
-
-add juga path ffmpeg di environtment variable nya
-agar bisa dipanggil di cmd 
-path ffmpeg nya yaitu
-```batch
-C:\ffmpeg\bin
-
-```
-
 ### Usage
 Run the Whatsapp bot
 
@@ -61,17 +46,22 @@ after running it you need to scan the qr
 - Change groupLimit on settings/setting.json
 - Change memberLimit on settings/setting.json
 - Change prefix on settings/setting.json
-
 - Change all apiKey settings/api.json
+- Change menu on lib/menu.js
+pls dont remove my github link:)
 
 ---
 
 ## Features
 
-| Fitur blm public |Yes|
+| Fitur premium |bantu klik star|
 | ------------- | ------------- |
-| pornhub downloads|bantu star sampe 50|
-| simi-simi chat bot|bantu star sampe 50|
+| nekopoi search link| ✅|
+| pornhub downloads| sampe 45|
+| redtube downloads| sampe 40|
+| sex.com downloads| sampe 40|
+| simi-simi chat bot| sampe 50|
+| nekopoi search video| sampe 50|
 
 | Creator |Yes|
 | ------------- | ------------- |
@@ -94,6 +84,9 @@ after running it you need to scan the qr
 | Searchs |Yes|
 | ------------- | ------------- |
 | images |✅|
+| subreddit |✅|
+| resep makanan |✅|
+| nekopoi links |✅|
 
 | Random text |Yes|
 | ------------- | ------------- |
